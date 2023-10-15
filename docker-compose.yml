@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+#  docker_dind:
+#    image: docker:dind
+#    privileged: true
+#    ports:
+#      - 2376:2376
+#    environment:
+    #- DOCKER_TLS_CERTDIR=/certs
+    #volumes:
+    #  - .jenkins-docker-certs:/certs/client
+    #  - .jenkins-data:/var/jenkins_home
+    #networks:
+    # jenkins:
+
+  jenkins:
+    build: ./jenkins_blueocean
+    privileged: true
+    user: root
+    ports:
+      - 8080:8080
+      - 50000:50000
+    environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
+    volumes:
+      - .jenkins-docker-certs:/certs/client
+      - .jenkins-data:/var/jenkins_home
+      # - /var/run/docker.sock:/var/run/docker.sock
+      # /usr/local/bin/docker:/usr/local/bin/docker
+    networks:
+      jenkins:
+  
+  sonarqube:
+    image: sonarqube:lts-community
+    hostname: sonarqube
+    ports:
+      - 9000:9000
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      jenkins:
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+
+networks:
+  jenkins:
